@@ -28,13 +28,13 @@ public class MyDNA extends DNA
 
 		// Mutation will swap characters at 2 different indexes
 		String chromosome = this.getChromosome();
-		// choose index from 0-19 to use
-		int index1 = random.nextInt(20);
-		int index2 = random.nextInt(20);
+		// choose index from 0-12 to use
+		int index1 = random.nextInt(13);
+		int index2 = random.nextInt(13);
 
 		// if indexes are the same, reroll the second index
-		while (mutateIndex1 == mutateIndex2) {
-			mutateIndex2 = random.nextInt(20);
+		while (index1 == index2) {
+			index2 = random.nextInt(13);
 		}
 
 		StringBuilder mutationStr = new StringBuilder(chromosome);
@@ -68,16 +68,16 @@ public class MyDNA extends DNA
 		StringBuilder myChrom = new StringBuilder(myDNA);
 
 		// Grab second halves of each chromosome
-		String secondHalfMate = mateChrom.substring(10, 19);
-		String mySecondHalf = myChrom.substring(10, 19);
+		String secondHalfMate = mateChrom.substring(6, 12);
+		String mySecondHalf = myChrom.substring(6, 12);
 
 		// 1st half of myChrom + 2nd half of mateChrom
-		myChrom.replace(10, 19, secondHalfMate);
+		myChrom.replace(6, 12, secondHalfMate);
 		// 1st half of mateChrom + 2nd half of myChrom
-		mateChrom.replace(10, 19, mySecondHalf);
+		mateChrom.replace(6, 12, mySecondHalf);
 
-		mateCopy.setChromosome(mateChrom);
-		thisCopy.setChromosome(myChrom);
+		mateCopy.setChromosome(mateChrom.toString());
+		thisCopy.setChromosome(myChrom.toString());
 
 		// Add new DNA to list of offspring
 		offspring.add(mateCopy);

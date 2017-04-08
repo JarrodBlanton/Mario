@@ -2,6 +2,7 @@ package dk.itu.mario.engine.level.generator;
 
 import java.util.*;
 import java.lang.StringBuilder;
+import java.lang.System.*;
 
 import dk.itu.mario.MarioInterface.Constraints;
 import dk.itu.mario.MarioInterface.GamePlay;
@@ -20,6 +21,8 @@ public class MyLevelGenerator{
 
 	public boolean verbose = true; //print debugging info
 	private Random random = new Random();
+	private double bestFitness = 0.0;
+	private int fitnessCount = 0;
 
 	// MAKE ANY NEW MEMBER VARIABLES HERE
 
@@ -158,97 +161,69 @@ public class MyLevelGenerator{
 		StringBuilder newChromosome = new StringBuilder();
 
 		// Generates new integer and appends the corresponding alphabetic value to stringbuilder
-		println("Generating new individual...");
-		for (int i = 0; i < 20; i++) {
-			int newNum = random.nextInt(20);
-			println("Number = " + newNum);
+		System.out.println("Generating new individual...");
+		for (int i = 0; i < 13; i++) {
+			int newNum = random.nextInt(13);
+			System.out.println("Number = " + newNum);
 			switch(newNum) {
 				case 0:
-					println("Appending value 'a'");
+					System.out.println("Appending value 'a'");
 					newChromosome.append('a');
 					break;
 				case 1:
-					println("Appending value 'b'");
+					System.out.println("Appending value 'b'");
 					newChromosome.append('b');
 					break;
 				case 2:
-					println("Appending value 'c'");
+					System.out.println("Appending value 'c'");
 					newChromosome.append('c');
 					break;
 				case 3:
-					println("Appending value 'd'");
+					System.out.println("Appending value 'd'");
 					newChromosome.append('d');
 					break;
 				case 4:
-					println("Appending value 'e'");
+					System.out.println("Appending value 'e'");
 					newChromosome.append('e');
 					break;
 				case 5:
-					println("Appending value 'f'");
+					System.out.println("Appending value 'f'");
 					newChromosome.append('f');
 					break;
 				case 6:
-					println("Appending value 'g'");
+					System.out.println("Appending value 'g'");
 					newChromosome.append('g');
 					break;
 				case 7:
-					println("Appending value 'h'");
+					System.out.println("Appending value 'h'");
 					newChromosome.append('h');
 					break;
 				case 8:
-					println("Appending value 'i'");
+					System.out.println("Appending value 'i'");
 					newChromosome.append('i');
 					break;
 				case 9:
-					println("Appending value 'j'");
+					System.out.println("Appending value 'j'");
 					newChromosome.append('j');
 					break;
 				case 10:
-					println("Appending value 'k'");
+					System.out.println("Appending value 'k'");
 					newChromosome.append('k');
 					break;
 				case 11:
-					println("Appending value 'l'");
+					System.out.println("Appending value 'l'");
 					newChromosome.append('l');
 					break;
 				case 12:
-					println("Appending value 'm'");
+					System.out.println("Appending value 'm'");
 					newChromosome.append('m');
-					break;
-				case 13:
-					println("Appending value 'n'");
-					newChromosome.append('n');
-					break;
-				case 14:
-					println("Appending value 'o'");
-					newChromosome.append('o');
-					break;
-				case 15:
-					println("Appending value 'p'");
-					newChromosome.append('p');
-					break;
-				case 16:
-					println("Appending value 'q'");
-					newChromosome.append('q');
-					break;
-				case 17:
-					println("Appending value 'r'");
-					newChromosome.append('r');
-					break;
-				case 18:
-					println("Appending value 's'");
-					newChromosome.append('s');
-					break;
-				case 19:
-					println("Appending value 't'");
-					newChromosome.append('t');
 					break;
 				default:
 					break;
 			}
 		}
 
-		println("New chromosome value is = " + newChromosome.toString());
+		System.out.println("New chromosome value is = " + newChromosome.toString());
 
 		// Set chromosome for new DNA
 		individual.setChromosome(newChromosome.toString());
@@ -267,25 +242,29 @@ public class MyLevelGenerator{
 			return true;
 		}
 
+
 		// 2. Check if pre-determined fitness has been reached
 		MyDNA bestIndiv = getBestIndividual(population);
+		double currBestFitness = bestIndiv.getFitness();
 		// If the best fitness so far is .9, return true.
-		if (bestIndiv.getFitness() > 0.90) {
+		if (currBestFitness > 0.90) {
 			return true;
 		}
 
 		// 3. Check for convergence
-		boolean convergence = true;
-		if (count > 100) {
-			// If any of dna in the popuation have a fitness < 0.8, they have not converged.
-			for (MyDNA dna : population) {
-				if (dna.getFitness() < 0.80) {
-					convergence = false;
-				}
-			}
+		// If the fitness is the same, incrememnt the counter
+		if (bestFitness == currBestFitness) {
+			fitnessCount++;
 		}
 
-		if (convergence) {
+		// If current best fitness is better than previous best fitness, assign new value
+		if (currBestFitness > bestFitness) {
+			bestFitness = currBestFitness;
+			fitnessCount = 0;
+		}
+
+		// If the fitness has converged to an acceptable value, return true
+		if (fitnessCount >= 50 && bestFitness >= 0.8) {
 			return true;
 		}
 
@@ -312,7 +291,7 @@ public class MyLevelGenerator{
 			if(!selected.contains(index)) {
 				// Add individual, this will increment selected size
 				selected.add(population.get(index));
-				println("selected size is now " + selected.size());
+				System.out.println("selected size is now " + selected.size());
 			}
 		}
 
@@ -395,7 +374,6 @@ public class MyLevelGenerator{
 		competitionPool.addAll(newPopulation);
 
 		// Begin competition
-		MyDNA bestIndiv = null;
 		while(finalPopulation.size() < 200) {
 			// Find best individual
 			MyDNA bestIndiv = getBestIndividual(competitionPool);
@@ -408,6 +386,8 @@ public class MyLevelGenerator{
 		// YOUR CODE GOES ABOVE HERE
 		if (finalPopulation.size() != this.getPopulationSize()) {
 			System.err.println("Population not the correct size.");
+			System.err.println("Final population size = " + finalPopulation.size());
+			System.err.println("CORRECT population size = " + this.getPopulationSize());
 			System.exit(1);
 		}
 		return finalPopulation;
@@ -453,7 +433,7 @@ public class MyLevelGenerator{
 	{
 		for (int i=0; i < population.size(); i++) {
 			MyDNA dna = population.get(i);
-			System.out.println("Individual " + i + ": " + dna + " fitness: " + dna.getFitness());
+			System.out.println("Individual " + i + ": " + dna + " fitness: " + dna.getFitness() + " string: " + dna.getChromosome());
 		}
 	}
 

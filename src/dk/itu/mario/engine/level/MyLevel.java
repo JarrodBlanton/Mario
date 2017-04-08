@@ -7,6 +7,8 @@ import dk.itu.mario.engine.sprites.SpriteTemplate;
 import dk.itu.mario.engine.sprites.Enemy;
 import dk.itu.mario.engine.level.MyDNA;
 
+import java.lang.System.*;
+
 //To Run: java -cp bin dk.itu.mario.engine.PlayCustomized [PLAYER_TYPE]
 public class MyLevel extends Level{
 	//Store information about the level
@@ -52,9 +54,64 @@ public class MyLevel extends Level{
 		int length = STARTOFFSET;
 		String chrom = dna.getChromosome();
 
+		// Compose middle part of level with 13 characters of size 15 blocks
 		// Iterate through characters in chromosome
+
+		// NOTE: Difficulty is measured from 1 to 35(ish)
 		for (char c : chrom.toCharArray()) {
-			break;
+			switch (c) {
+				// Build easy/medium/hard straight blocks
+				case 'a':
+					length += buildStraight(length, 15, false, 1);
+					break;
+				case 'b':
+					length += buildStraight(length, 15, false, 20);
+					break;
+				case 'c':
+					length += buildStraight(length, 15, false, 35);
+					break;
+				case 'd':
+					// build jump
+					length += buildJump(length, 15);
+					break;
+				case 'e':
+					// build hill straight
+					length += buildHillStraight(length, 15, 0);
+					break;
+				case 'f':
+					// build tubes w/ easy difficulty
+					length += buildTubes(length, 15, 1);
+					break;
+				case 'g':
+					// build cannons
+					length += buildCannons(length, 15);
+					break;
+				case 'h':
+					// build straight w/ power blocks
+					length += buildStraightWithPower(length, 15);
+					break;
+				case 'i':
+					// build straight w/ empty blocks
+					length += buildStraightWithEmpty(length, 15);
+					break;
+				case 'j':
+					// build straight w/ coins
+					length += buildStraightWithCoins(length, 15);
+					break;
+				case 'k':
+					// build straight w/ coin blocks
+					length += buildStraightWithCoinBlocks(length, 15);
+					break;
+				case 'l':
+					// build straight w/ enemy line: starting length, width of block, difficulty
+					length += buildStraightEnemyLine(length, 15, 3);
+					break;
+				case 'm':
+					// build straight w/ a lot of coins
+					length += buildStraightExtraCoins(length, 15);
+				default:
+					break;
+			}
 		}
 
 
@@ -70,6 +127,7 @@ public class MyLevel extends Level{
 		xExit = width-EXITPOSITION;
 		yExit = DEFAULTHEIGHT-2;
 
+		fixWalls();
 	}
 
 
@@ -84,11 +142,11 @@ public class MyLevel extends Level{
     	//js: the number of blocks that are available at either side for free
         int js = random.nextInt(4) + 2;
         int jl = random.nextInt(2) + 2;
-        int length = js * 2 + jl;
+        int length = 15;
 
         boolean hasStairs = random.nextInt(3) == 0;
 
-        int floor = height - 1 - random.nextInt(4);
+        int floor = DEFAULTHEIGHT-2;
 		//run from the start x position, for the whole length
         for (int x = xo; x < xo + length; x++)
         {
@@ -130,10 +188,10 @@ public class MyLevel extends Level{
    	//A built in function for helping to build a cannon
     public int buildCannons(int xo, int maxLength)
     {
-        int length = 10;
+        int length = 15;
         if (length > maxLength) length = maxLength;
 
-        int floor = height - 1 - random.nextInt(4);
+        int floor = DEFAULTHEIGHT-2;
         int xCannon = xo + 1 + random.nextInt(4);
         for (int x = xo; x < xo + length; x++)
         {
@@ -177,10 +235,10 @@ public class MyLevel extends Level{
     //A built in function for building a flat hill
     public int buildHillStraight(int xo, int maxLength, int difficulty)
     {
-        int length = 10;
+        int length = 15;
         if (length > maxLength) length = maxLength;
 
-        int floor = height - 1 - random.nextInt(4);
+        int floor = DEFAULTHEIGHT-2;
         for (int x = xo; x < xo + length; x++)
         {
             for (int y = 0; y < height; y++)
@@ -281,10 +339,10 @@ public class MyLevel extends Level{
     //A built in function for building a tube (difficulty determines chance of flower spawn)
     public int buildTubes(int xo, int maxLength, int difficulty)
     {
-        int length = 10;
+        int length = 15;
         if (length > maxLength) length = maxLength;
 
-        int floor = height - 1 - random.nextInt(4);
+        int floor = DEFAULTHEIGHT-2;
         int xTube = xo + 1 + random.nextInt(4);
         int tubeHeight = floor - random.nextInt(2) - 2;
         for (int x = xo; x < xo + length; x++)
@@ -337,15 +395,15 @@ public class MyLevel extends Level{
     //A built in function for building a straight path
     public int buildStraight(int xo, int maxLength, boolean safe, int difficulty)
     {
-        int length = 10;
+        int length = 15;
 
-        if (safe)
-        	length = 10 + random.nextInt(5);
+        // if (safe)
+        // 	length = 10 + random.nextInt(5);
 
         if (length > maxLength)
         	length = maxLength;
 
-        int floor = height - 1 - random.nextInt(4);
+        int floor = DEFAULTHEIGHT-2;
 
         //runs from the specified x position to the length of the segment
         for (int x = xo; x < xo + length; x++)
@@ -363,12 +421,225 @@ public class MyLevel extends Level{
         {
             if (length > 5)
             {
-                //decorate(xo, xo + length, floor, difficulty);
+                decorate(xo, xo + length, floor, difficulty);
             }
         }
 
         return length;
     }
+
+	//
+	public int buildStraightWithPower(int xo, int maxLength) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makePowerBlocks(xo, floor);
+		return length;
+	}
+
+	public int buildStraightWithEmpty(int xo, int maxLength) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makeEmptyBlocks(xo, floor);
+		return length;
+	}
+
+	public int buildStraightWithCoins(int xo, int maxLength) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makeCoins(xo, floor);
+		return length;
+	}
+
+	public int buildStraightWithCoinBlocks(int xo, int maxLength) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makeCoinBlocks(xo, floor);
+		return length;
+	}
+
+	public int buildStraightExtraCoins(int xo, int maxLength) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makeExtraCoins(xo, floor);
+		return length;
+	}
+
+	public int buildStraightEnemyLine(int xo, int maxLength, int difficulty) {
+		int length = 15;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+		int floor = DEFAULTHEIGHT-2;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+		makeNewEnemyLine(xo, floor, difficulty);
+		return length;
+	}
+
+	private void makeNewEnemyLine(int xo, int floor, int difficulty) {
+		for (int x = xo; x < xo + 5; x++) {
+			setSpriteTemplate(x, floor - 1, new SpriteTemplate(random.nextInt(3), random.nextInt(10) < difficulty));
+			ENEMIES++;
+		}
+	}
+
+	private void makePowerBlocks(int x, int floor) {
+		if (floor < 5)
+			return;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_POWERUP);
+		BLOCKS_COINS++;
+
+
+	}
+
+	private void makeEmptyBlocks(int x, int floor) {
+		if (floor < 5)
+			return;
+		setBlock(x++, floor - 4, BLOCK_EMPTY);
+		BLOCKS_EMPTY++;
+		setBlock(x++, floor - 4, BLOCK_EMPTY);
+		BLOCKS_EMPTY++;
+		setBlock(x++, floor - 4, BLOCK_EMPTY);
+		BLOCKS_EMPTY++;
+		setBlock(x++, floor - 4, BLOCK_EMPTY);
+		BLOCKS_EMPTY++;
+	}
+
+	private void makeCoinBlocks(int x, int floor) {
+		if (floor < 5)
+			return;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+		setBlock(x++, floor - 4, BLOCK_COIN);
+		BLOCKS_COINS++;
+	}
+
+	private void makeCoins(int x, int floor) {
+		if (floor < 3)
+			return;
+		setBlock(x++, floor - 2, COIN);
+		COINS++;
+		setBlock(x++, floor - 2, COIN);
+		COINS++;
+		setBlock(x++, floor - 2, COIN);
+		COINS++;
+		setBlock(x++, floor - 2, COIN);
+		COINS++;
+	}
+
+	private void makeExtraCoins(int x, int floor) {
+		if (floor < 6)
+			return;
+
+		for (int i = x; i < x + 6; i++) {
+			for (int j = 0; j < 4; j++) {
+				setBlock(i, floor - 1 - j, COIN);
+				COINS++;
+			}
+		}
+	}
+
 
     //A built in function to add "decoration"
     public void decorate(int xStart, int xLength, int floor, int difficulty)
